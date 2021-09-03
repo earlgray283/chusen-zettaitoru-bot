@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	"github.com/joho/godotenv"
+	"github.com/robfig/cron/v3"
 	"github.com/slack-go/slack"
 	"github.com/szpp-dev-team/gakujo-api/gakujo"
 	"github.com/szpp-dev-team/gakujo-api/model"
@@ -21,6 +22,13 @@ func init() {
 }
 
 func main() {
+	c := cron.New()
+	if _, err := c.AddFunc("00 0 * * *", task); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func task() {
 	sc := slack.New(os.Getenv("SLACK_TOKEN"))
 	log.Println(os.Getenv("J_USERNAME"))
 	log.Println(os.Getenv("J_PASSWORD"))

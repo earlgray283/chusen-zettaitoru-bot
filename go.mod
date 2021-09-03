@@ -5,6 +5,7 @@ go 1.17
 
 require (
 	github.com/joho/godotenv v1.3.0
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/slack-go/slack v0.9.4
 	github.com/szpp-dev-team/gakujo-api v0.0.0-20210903010155-c3101dffbeb6
 )
