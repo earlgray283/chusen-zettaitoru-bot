@@ -12,7 +12,9 @@ import (
 
 func init() {
 	if err := godotenv.Load(".env"); err != nil {
-		log.Fatal(err)
+		if os.Getenv("SLACK_TOKEN") == "" {
+			log.Fatalf(".env was not found\n%v\n", err)
+		}
 	}
 }
 
