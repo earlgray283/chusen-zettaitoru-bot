@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"sort"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/robfig/cron/v3"
@@ -27,8 +28,12 @@ func main() {
 		log.Fatal(err)
 	}
 	c.Start()
-}
 
+	for {
+		time.Sleep(time.Hour * 24)
+		log.Println("1 day later...")
+	}
+}
 
 func task() {
 	sc := slack.New(os.Getenv("SLACK_TOKEN"))
