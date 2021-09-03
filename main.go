@@ -22,6 +22,8 @@ func init() {
 
 func main() {
 	sc := slack.New(os.Getenv("SLACK_TOKEN"))
+	log.Println(os.Getenv("J_USERNAME"))
+	log.Println(os.Getenv("J_PASSWORD"))
 	gc := gakujo.NewClient()
 	if err := gc.Login(os.Getenv("J_USERNAME"), os.Getenv("J_PASSWORD")); err != nil {
 		log.Fatal(err)
@@ -58,7 +60,7 @@ func makeMessageAttachment(rows []*model.ChusenRegistrationRow) *slack.Attachmen
 	sort.Slice(rows, func(i, j int) bool {
 		percent1 := float64(rows[i].RegistrationStatus.FirstChoiceNum) / float64(rows[i].Capacity)
 		percent2 := float64(rows[j].RegistrationStatus.FirstChoiceNum) / float64(rows[j].Capacity)
-		return percent1 < percent2
+		return percent1 > percent2
 	})
 
 	for i, row := range rows {
