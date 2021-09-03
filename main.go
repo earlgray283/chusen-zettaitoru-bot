@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"sort"
 
 	"github.com/joho/godotenv"
 	"github.com/slack-go/slack"
@@ -19,9 +21,7 @@ func init() {
 }
 
 func main() {
-	sc := slack.New(
-		os.Getenv("SLACK_TOKEN"),
-	)
+	sc := slack.New(os.Getenv("SLACK_TOKEN"))
 	gc := gakujo.NewClient()
 	if err := gc.Login(os.Getenv("J_USERNAME"), os.Getenv("J_PASSWORD")); err != nil {
 		log.Fatal(err)
@@ -53,6 +53,32 @@ func makeMessageAttachment(rows []*model.ChusenRegistrationRow) *slack.Attachmen
 		Pretext: "人気な抽選科目(75%以上)を発表するよー！",
 		Title:   "人気な抽選科目ランキング",
 		Fields:  make([]slack.AttachmentField, 0),
+	}
+
+	sort.Slice(rows, func(i, j int) bool {
+		percent1 := float64(rows[i].RegistrationStatus.FirstChoiceNum) / float64(rows[i].Capacity)
+		percent2 := float64(rows[j].RegistrationStatus.FirstChoiceNum) / float64(rows[j].Capacity)
+		return percent1 < percent2
+	})
+
+	for i, row := range rows {
+		percent := float64(row.RegistrationStatus.FirstChoiceNum) / float64(row.Capacity)
+		if percent < 75.0 {
+			break
+		}
+		attachment.Fields = append(attachment.Fields,
+			slack.AttachmentField{
+				Value: fmt.Sprintf(
+					"%d位 %s(%s) %.2v(%v/%v) %%",
+					i,
+					row.SubjectName,
+					row.ClassName,
+					percent,
+					row.RegistrationStatus.FirstChoiceNum,
+					row.Capacity,
+				),
+			},
+		)
 	}
 
 	return &attachment
