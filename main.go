@@ -26,7 +26,9 @@ func main() {
 	if _, err := c.AddFunc("00 0 * * *", task); err != nil {
 		log.Fatal(err)
 	}
+	c.Start()
 }
+
 
 func task() {
 	sc := slack.New(os.Getenv("SLACK_TOKEN"))
