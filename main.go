@@ -52,7 +52,7 @@ func main() {
 func makeMessageAttachment(rows []*model.ChusenRegistrationRow) *slack.Attachment {
 	attachment := slack.Attachment{
 		Color:   "good",
-		Pretext: "人気な抽選科目(75%以上)を発表するよー！",
+		Pretext: "人気な抽選科目(80%以上)を発表するよー！",
 		Title:   "人気な抽選科目ランキング",
 		Fields:  make([]slack.AttachmentField, 0),
 	}
@@ -64,15 +64,15 @@ func makeMessageAttachment(rows []*model.ChusenRegistrationRow) *slack.Attachmen
 	})
 
 	for i, row := range rows {
-		percent := float64(row.RegistrationStatus.FirstChoiceNum) / float64(row.Capacity)
-		if percent < 75.0 {
+		percent := float64(row.RegistrationStatus.FirstChoiceNum) / float64(row.Capacity) * 100
+		if percent < 80 {
 			break
 		}
 		attachment.Fields = append(attachment.Fields,
 			slack.AttachmentField{
 				Value: fmt.Sprintf(
-					"%d位 %s(%s) %.2v(%v/%v) %%",
-					i,
+					"%d位\t%s(%s)\t%.1f(%v/%v)%%",
+					i+1,
 					row.SubjectName,
 					row.ClassName,
 					percent,
