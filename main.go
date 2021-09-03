@@ -19,7 +19,9 @@ func init() {
 }
 
 func main() {
-	sc := slack.New(os.Getenv("SLACK_TOLEN"))
+	sc := slack.New(
+		os.Getenv("SLACK_TOKEN"),
+	)
 	gc := gakujo.NewClient()
 	if err := gc.Login(os.Getenv("J_USERNAME"), os.Getenv("J_PASSWORD")); err != nil {
 		log.Fatal(err)
