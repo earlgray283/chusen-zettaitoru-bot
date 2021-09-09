@@ -1,30 +1,39 @@
-# chusen-kamoku-bot
+# 抽選絶対取る bot
 
-第一志望の割合が80%以上の抽選科目のランキングを毎日 00:00 に slack に投げます。あんまり役立たない
+〜For 抽選漏れした哀れな静大生〜  
 
-## Deploy
+15分毎に履修登録 api を叩きます
 
-### 0. slack-api で app を追加する
+## Setup
 
-やる
-
-### 1. `.env` を用意する
-
-.env
+`.env` を作ってください
 
 ```text
-J_USERNAME=学情のusername
-J_PASSWORD=学情のpassword
-SLACK_CHANNEL_ID=slack のチャンネルid
-SLACK_TOKEN=slack-bot の token
+J_USERNAME=学情のid
+J_PASSWORD=学情のpswd
+KAMOKU_CODE=とりたい科目のコード
+CLASS_CODE=とりたい科目のクラスコード(html から確認してください)
+UNIT=とりたい科目の単位数
+RADIO=とりたい科目が上から何番目にあるか(0-indexedで)
+YOUBI=曜日(月曜日=1)
+JIGEN=何コマ目
 ```
 
-### 2. ビルド & 実行
+## Run
 
-golang 内で cron によるタスクスケジューリングはしてあるので、daemon 実行すれば定期実行は可能となります。
+### Linux, macOS
+
+バックグラウンドで動きます
 
 ```console
 $ go build -o ./app
 $ ./app &
-$ nohup ./app & # サーバー上でデプロイする場合
+```
+
+### Windows
+
+絶対に端末画面は消さないでください
+
+```console
+$ go run .
 ```
