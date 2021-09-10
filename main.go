@@ -37,8 +37,19 @@ func init() {
 }
 
 func main() {
+	gc := gakujo.NewClient()
+	if err := gc.Login(os.Getenv("J_USERNAME"), os.Getenv("J_PASSWORD")); err != nil {
+		log.Fatal(err)
+	}
+	kc, err := gc.NewKyoumuClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	c := cron.New()
-	if _, err := c.AddFunc("15 * * * *", task); err != nil {
+	if _, err := c.AddFunc("*/1 * * * *", func() {
+		task(kc)
+	}); err != nil {
 		log.Fatal(err)
 	}
 	c.Start()
@@ -49,17 +60,13 @@ func main() {
 	}
 }
 
-func task() {
+func task(kc *gakujo.KyoumuClient) {
+	if 3 < time.Now().Hour() && time.Now().Hour() < 5 {
+		return
+	}
 	log.Println(os.Getenv("J_USERNAME"))
 	log.Println(os.Getenv("J_PASSWORD"))
-	gc := gakujo.NewClient()
-	if err := gc.Login(os.Getenv("J_USERNAME"), os.Getenv("J_PASSWORD")); err != nil {
-		log.Fatal(err)
-	}
-	kc, err := gc.NewKyoumuClient()
-	if err != nil {
-		log.Fatal(err)
-	}
+
 	formdata := model.NewPostKamokuFormData(kamokuCode, classCode, unit, radio, youbi, jigen)
 	if err := kc.PostRishuRegistration(formdata); err != nil {
 		if errors.Is(err, gakujo.OverCapasityError{}) {
