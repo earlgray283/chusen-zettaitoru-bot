@@ -3,80 +3,79 @@ package main
 import (
 	"log"
 	"os"
-	"strconv"
 	"time"
 
+	_ "time/tzdata"
+
+	"github.com/go-co-op/gocron"
 	"github.com/joho/godotenv"
-	"github.com/pkg/errors"
-	"github.com/robfig/cron/v3"
 	"github.com/szpp-dev-team/gakujo-api/gakujo"
 	"github.com/szpp-dev-team/gakujo-api/model"
 )
 
 var (
+	jUsername  string
+	jPassword  string
+	faculty    string
+	department string
+	course     string
+	grade      string
 	kamokuCode string
 	classCode  string
-	unit       int
-	radio      int
-	youbi      int
-	jigen      int
+	unit       string
+	radio      string
 )
 
 func init() {
 	if err := godotenv.Load(".env"); err != nil {
-		if os.Getenv("SLACK_TOKEN") == "" {
-			log.Fatalf(".env was not found\n%v\n", err)
-		}
+		log.Fatal(err)
 	}
+	jUsername = os.Getenv("J_USERNAME")
+	jPassword = os.Getenv("J_PASSWORD")
+	faculty = os.Getenv("FACULTY")
+	department = os.Getenv("DEPARTMENT")
+	course = os.Getenv("COURSE")
+	grade = os.Getenv("GRADE")
 	kamokuCode = os.Getenv("KAMOKU_CODE")
 	classCode = os.Getenv("CLASS_CODE")
-	unit, _ = strconv.Atoi(os.Getenv("UNIT"))
-	radio, _ = strconv.Atoi(os.Getenv("RADIO"))
-	youbi, _ = strconv.Atoi(os.Getenv("YOUBI"))
-	jigen, _ = strconv.Atoi(os.Getenv("JIGEN"))
+	unit = os.Getenv("UNIT")
+	radio = os.Getenv("RADIO")
 }
 
 func main() {
 	gc := gakujo.NewClient()
-	if err := gc.Login(os.Getenv("J_USERNAME"), os.Getenv("J_PASSWORD")); err != nil {
+	if err := gc.Login(jUsername, jPassword); err != nil {
 		log.Fatal(err)
 	}
 	kc, err := gc.NewKyoumuClient()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	c := cron.New()
-	if _, err := c.AddFunc("*/1 * * * *", func() {
-		task(kc)
-	}); err != nil {
-		log.Fatal(err)
+	formdata := &model.PostKamokuFormData{
+		Faculty:    faculty,
+		Department: department,
+		Course:     course,
+		Grade:      grade,
+		KamokuCode: kamokuCode,
+		ClassCode:  classCode,
+		Unit:       unit,
+		Radio:      radio,
 	}
-	c.Start()
 
-	for {
-		time.Sleep(time.Hour * 24)
-		log.Println("1 day later...")
-	}
-}
-
-func task(kc *gakujo.KyoumuClient) {
-	if 3 < time.Now().Hour() && time.Now().Hour() < 5 {
-		return
-	}
-	log.Println(os.Getenv("J_USERNAME"))
-	log.Println(os.Getenv("J_PASSWORD"))
-
-	formdata := model.NewPostKamokuFormData(kamokuCode, classCode, unit, radio, youbi, jigen)
-	if err := kc.PostRishuRegistration(formdata); err != nil {
-		if errors.Is(err, gakujo.OverCapasityError{}) {
-			log.Println("定員オーバーで履修登録ができませんでした。諦めない")
+	c := gocron.NewScheduler(time.Local)
+	_, err = c.Every(10 * time.Second).Do(func() {
+		if 3 <= time.Now().Hour() && time.Now().Hour() <= 5 {
 			return
 		}
-		log.Println("別のエラーが発生したようです")
-		log.Println(err)
-		return
+		if err := kc.PostRishuRegistration(formdata); err != nil {
+			log.Println(err)
+			return
+		}
+		log.Printf("%v を勝ち取りました！確認してください！\n", os.Getenv("KAMOKU_CODE"))
+		c.Stop()
+	})
+	if err != nil {
+		log.Fatal(err)
 	}
-	log.Printf("%v を勝ち取りました！確認してください！\n", os.Getenv("KAMOKU_CODE"))
-	os.Exit(0)
+	c.StartBlocking()
 }
