@@ -1,39 +1,48 @@
-# 抽選絶対取る bot
+# 抽選絶対取る tool
 
-〜For 抽選漏れした哀れな静大生〜  
+抽選で落とした科目の履修登録を 10s 間隔で行います。
 
-15分毎に履修登録 api を叩きます
+## Usage
 
-## Setup
-
-`.env` を作ってください
+1. `.env` を作成
 
 ```text
 J_USERNAME=学情のid
 J_PASSWORD=学情のpswd
-KAMOKU_CODE=とりたい科目のコード
-CLASS_CODE=とりたい科目のクラスコード(html から確認してください)
-UNIT=とりたい科目の単位数
-RADIO=とりたい科目が上から何番目にあるか(0-indexedで)
-YOUBI=曜日(月曜日=1)
-JIGEN=何コマ目
+KAMOKU_CODE=KAMOKU_CODE 等の確認方法を参照
+CLASS_CODE=KAMOKU_CODE 等の確認方法を参照
+UNIT=KAMOKU_CODE 等の確認方法を参照
+RADIO=KAMOKU_CODE 等の確認方法を参照
+YOUBI=KAMOKU_CODE 等の確認方法を参照
+JIGEN=KAMOKU_CODE 等の確認方法を参照
 ```
 
-## Run
-
-### Linux, macOS
-
-バックグラウンドで動きます
-
-```console
-$ go build -o ./app
-$ ./app &
-```
-
-### Windows
-
-絶対に端末画面は消さないでください
+2. 実行
 
 ```console
 $ go run .
 ```
+
+## `KAMOKU_CODE` 等の確認方法
+
+1. 「一般講義履修登録」を「教務システム」から開きます
+
+<img src="https://i.imgur.com/Qp3IOO4.png" width=400px>
+
+
+2. 取りたい科目のコマの「鉛筆アイコン」をクリックします
+
+<img src="https://i.imgur.com/rlmpgqn.png" width=400px>
+
+
+3. 開発者ツールを「F12」キーで開きます
+
+<img src="https://i.imgur.com/5PdzJe4.jpg" width=400px>
+
+4. 取りたい科目をラジオボタンで選択して「登録」を行ってください。
+
+5. リクエストのログが色々出てきますが、その内一番上の `searchKamoku.do` を選択し、「ペイロード(もしくは要求)」タブを選択してください。
+
+<img src=https://i.imgur.com/mipP3aL.png width=400px>
+
+6. ペイロードの中身を見ながら `.env` の対応する箇所に記入をしてください。(`J_USERNAME` や `J_PASSWORD` は学情のログイン時の情報です。)
